@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RÉVOLUTION — elwyn.raw</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,600;0,800;1,600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0d0d0d;--paper:#f0ede6;--blue:#0448b5;--navy:#0a2a6e;--bg:#0d0d0d;--fg:#f0ede6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#0d0d0d;--fg:#f0ede6}}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:20px/1.45 "EB Garamond",Georgia,serif;overflow-x:hidden}
+.mono{font-family:"Share Tech Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.1em;font-size:12px}
+#bg{position:fixed;inset:0;z-index:-2;background:var(--photo,none) center/cover no-repeat,linear-gradient(160deg,var(--navy),var(--ink) 65%);filter:grayscale(1) contrast(1.25) brightness(.8)}
+#tint{position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#0448b5cc,#0a2a6ee6 60%,#0d0d0df2);mix-blend-mode:multiply}
+#dots{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.35;background:radial-gradient(#0d0d0d 1.2px,transparent 1.6px) 0 0/7px 7px}
+.wrap{max-width:1000px;margin:0 auto;padding:20px 18px 80px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:2px solid var(--paper);padding-bottom:10px}
+header button{font:inherit;background:none;color:var(--paper);border:1px solid var(--paper);padding:4px 10px;cursor:pointer}
+h1{font-weight:800;font-size:clamp(52px,14vw,150px);line-height:.88;text-transform:uppercase;margin:34px 0 10px;letter-spacing:-.02em;text-shadow:4px 4px 0 var(--ink)}
+.slogan{display:inline-block;background:var(--paper);color:var(--ink);font-style:italic;font-weight:600;font-size:clamp(20px,4vw,30px);padding:4px 14px;transform:rotate(-1.5deg);margin:0 0 26px}
+.band{margin:0 -18px 34px;background:var(--paper);color:var(--ink);overflow:hidden;white-space:nowrap;padding:8px 0;border-block:3px solid var(--ink);transform:rotate(-1deg)}
+.band span{display:inline-block;padding-left:100%;animation:m 28s linear infinite}
+@keyframes m{to{transform:translateX(-100%)}}
+@media(prefers-reduced-motion:reduce){.band span{animation:none;padding-left:12px}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:34px 26px}
+.post{background:var(--paper);color:var(--ink);padding:10px 10px 14px;box-shadow:6px 6px 0 var(--ink);position:relative}
+.post:nth-child(3n+1){transform:rotate(-1.2deg)}.post:nth-child(3n+2){transform:rotate(.9deg)}.post:nth-child(3n){transform:rotate(-.4deg)}
+.post::before{content:"";position:absolute;top:-12px;left:50%;width:84px;height:24px;margin-left:-42px;background:#0448b5b3;transform:rotate(3deg)}
+.post .im{aspect-ratio:4/5;background:linear-gradient(135deg,var(--navy),var(--ink));background-size:cover;background-position:center;filter:grayscale(.2) contrast(1.1)}
+.post p{margin:10px 2px 8px;font-size:19px}
+.post a{display:block;text-align:center;background:var(--ink);color:var(--paper);padding:9px;text-decoration:none}
+.post a:hover{background:var(--blue)}
+footer{margin-top:60px;border-top:2px solid var(--paper);padding-top:10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+#ed{position:fixed;right:0;top:0;bottom:0;width:min(360px,100%);background:var(--paper);color:var(--ink);padding:calc(16px + env(safe-area-inset-top,0px)) 16px 24px;overflow:auto;transform:translateX(100%);transition:transform .25s;z-index:5;font-size:16px}
+#ed.open{transform:none}
+#ed h3{margin:14px 0 6px}#ed label{display:block;margin:8px 0 2px}
+#ed input[type=text],#ed input[type=date],#ed textarea{width:100%;font:inherit;padding:6px;border:1px solid var(--ink);background:#fff;color:var(--ink)}
+#ed button{font:inherit;margin:6px 6px 0 0;padding:6px 12px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+#ed .li{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #0d0d0d33;padding:4px 0}
+#gone{display:none;min-height:80vh;align-items:center;justify-content:center;text-align:center}
+</style>
+</head>
+<body>
+<div id="bg"></div><div id="tint"></div><div id="dots"></div>
+<div class="wrap" id="page">
+<header class="mono"><span>elwyn.raw · Toulouse</span><span id="timer"></span><button id="eb" hidden aria-label="Modifier la page">✎ Modifier</button></header>
+<h1 id="t"></h1>
+<div class="slogan" id="s"></div>
+<div class="band mono"><span id="mq"></span></div>
+<main class="grid" id="g"></main>
+<footer class="mono"><span id="sec">© elwyn.raw</span><span>Page éphémère</span></footer>
+</div>
+<div class="wrap" id="gone"><div><h1>Effacé.</h1><p class="mono">Merci d’être passé · elwyn.raw</p></div></div>
+
+<aside id="ed" hidden aria-label="Éditeur">
+<button id="x" style="float:right">Fermer</button>
+<h3 style="margin-top:0">Page</h3>
+<label>Titre</label><input type="text" id="it">
+<label>Phrase d’accroche</label><input type="text" id="is">
+<label>Disparaît le</label><input type="date" id="ie">
+<label>Photo de fond</label><input type="file" id="ib" accept="image/*">
+<h3>Ajouter une publication</h3>
+<label>Visuel</label><input type="file" id="pf" accept="image/*">
+<label>Légende</label><textarea id="pc" rows="2"></textarea>
+<label>Lien Instagram</label><input type="text" id="pu" placeholder="https://www.instagram.com/p/…">
+<button id="pa">Ajouter</button>
+<h3>Publications</h3><div id="pl"></div>
+<h3>Sauvegarde</h3>
+<button id="cp">Copier la config</button><button id="rs">Réinitialiser</button>
+<p style="font-size:14px">Les modifications faites ici restent dans ton navigateur. Pour publier la version finale, copie la config et envoie-la moi.</p>
+</aside>
+
+<script>
+var KEY="rev2", DEF={title:"Révolution",slogan:"Ce qu’on a vu dans la rue.",end:"2026-11-30",bg:"",posts:[
+{img:"",cap:"Légende de ta publication. Remplace-moi.",url:""},{img:"",cap:"Une deuxième image, un autre jour.",url:""},{img:"",cap:"Et une troisième.",url:""}]};
+var S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S)S=JSON.parse(JSON.stringify(DEF));
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){alert("Stockage plein : réduis le nombre d’images.")}}
+function $(i){return document.getElementById(i)}
+function render(){
+  $("t").textContent=S.title; $("s").textContent=S.slogan;
+  $("bg").style.setProperty("--photo",S.bg?"url("+S.bg+")":"none");
+  var m=(S.title+" · "+S.slogan+" · ").toUpperCase(); $("mq").textContent=m+m+m;
+  var g=$("g"); g.textContent="";
+  S.posts.forEach(function(p){
+    var a=document.createElement("article"); a.className="post";
+    var im=document.createElement("div"); im.className="im"; if(p.img)im.style.backgroundImage="url("+p.img+")"; a.appendChild(im);
+    var c=document.createElement("p"); c.textContent=p.cap; a.appendChild(c);
+    if(/^https:\/\//.test(p.url||"")){var l=document.createElement("a");l.href=p.url;l.target="_blank";l.rel="noopener";l.className="mono";l.textContent="Voir sur Instagram →";a.appendChild(l)}
+    g.appendChild(a);
+  });
+  var L=$("pl"); L.textContent="";
+  S.posts.forEach(function(p,i){var d=document.createElement("div");d.className="li";var s=document.createElement("span");s.textContent=(p.cap||"").slice(0,32);var b=document.createElement("button");b.textContent="Suppr.";b.onclick=function(){S.posts.splice(i,1);save();render()};d.appendChild(s);d.appendChild(b);L.appendChild(d)});
+  $("it").value=S.title;$("is").value=S.slogan;$("ie").value=S.end;
+}
+function tick(){
+  var d=new Date(S.end+"T23:59:59")-new Date();
+  if(d<=0&&!$("ed").classList.contains("open")){$("page").style.display="none";$("gone").style.display="flex";return}
+  $("page").style.display="";$("gone").style.display="none";
+  $("timer").textContent=d>0?"Disparaît dans "+Math.floor(d/864e5)+" j "+Math.floor(d%864e5/36e5)+" h":"Expirée";
+}
+function shrink(f,max,cb){var r=new FileReader();r.onload=function(){var i=new Image();i.onload=function(){var k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=i.width*k;c.height=i.height*k;c.getContext("2d").drawImage(i,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",.8))};i.src=r.result};r.readAsDataURL(f)}
+$("eb").onclick=function(){$("ed").classList.add("open")};
+$("x").onclick=function(){$("ed").classList.remove("open");tick()};
+$("it").oninput=function(){S.title=this.value;save();render()};
+$("is").oninput=function(){S.slogan=this.value;save();render()};
+$("ie").onchange=function(){S.end=this.value||S.end;save();tick()};
+$("ib").onchange=function(){var f=this.files[0];if(f)shrink(f,1600,function(u){S.bg=u;save();render()})};
+$("pa").onclick=function(){
+  var f=$("pf").files[0],add=function(u){S.posts.unshift({img:u,cap:$("pc").value,url:$("pu").value.trim()});$("pc").value="";$("pu").value="";$("pf").value="";save();render()};
+  if(f)shrink(f,1000,add);else add("");
+};
+$("cp").onclick=function(){var b=this;try{navigator.clipboard.writeText(JSON.stringify(S)).then(function(){b.textContent="Copié ✓"})}catch(e){b.textContent="Copie impossible"}};
+$("rs").onclick=function(){if(confirm("Tout remettre à zéro ?")){S=JSON.parse(JSON.stringify(DEF));save();render();tick()}};
+function openEd(){$("eb").hidden=false;$("ed").hidden=false;$("ed").classList.add("open")}
+var n=0,tm;
+$("sec").onclick=function(){n++;clearTimeout(tm);tm=setTimeout(function(){n=0},2500);if(n>=5){n=0;openEd()}};
+addEventListener("keydown",function(e){if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==="e")openEd()});
+render();tick();setInterval(tick,60000);
+</script>
+</body>
+</html>
