@@ -38,7 +38,7 @@ footer{margin-top:60px;border-top:2px solid var(--paper);padding-top:10px;displa
 #ed{position:fixed;right:0;top:0;bottom:0;width:min(360px,100%);background:var(--paper);color:var(--ink);padding:calc(16px + env(safe-area-inset-top,0px)) 16px 24px;overflow:auto;transform:translateX(100%);transition:transform .25s;z-index:5;font-size:16px}
 #ed.open{transform:none}
 #ed h3{margin:14px 0 6px}#ed label{display:block;margin:8px 0 2px}
-#ed input[type=text],#ed input[type=date],#ed textarea{width:100%;font:inherit;padding:6px;border:1px solid var(--ink);background:#fff;color:var(--ink)}
+#ed input[type=text],#ed input[type=password],#ed input[type=date],#ed textarea{width:100%;font:inherit;padding:6px;border:1px solid var(--ink);background:#fff;color:var(--ink)}
 #ed button{font:inherit;margin:6px 6px 0 0;padding:6px 12px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
 #ed .li{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #0d0d0d33;padding:4px 0}
 .lg{display:flex;align-items:center;gap:10px}.lg img{border-radius:50%;border:1px solid var(--paper)}
@@ -70,9 +70,13 @@ footer{margin-top:60px;border-top:2px solid var(--paper);padding-top:10px;displa
 <label>Lien Instagram</label><input type="text" id="pu" placeholder="https://www.instagram.com/p/…">
 <button id="pa">Ajouter</button>
 <h3>Publications</h3><div id="pl"></div>
-<h3>Sauvegarde</h3>
-<button id="pub" disabled>Publier pour tout le monde</button><button id="rs">Réinitialiser</button>
-<p id="pst" style="font-size:14px">Tout ce que tu changes ici reste privé jusqu’à ce que tu publies.</p>
+<h3>Publication</h3>
+<label>Compte GitHub</label><input type="text" id="go">
+<label>Dépôt</label><input type="text" id="gr">
+<label>Branche</label><input type="text" id="gb" placeholder="main">
+<label>Jeton d’accès</label><input type="password" id="gt" autocomplete="off">
+<button id="pub">Publier pour tout le monde</button><button id="rs">Réinitialiser</button>
+<p id="pst" style="font-size:14px">Ces réglages restent dans ce navigateur. La mise en ligne prend de 1 à 10 minutes.</p>
 </aside>
 
 <script id="data" type="application/json">null</script>
@@ -86,12 +90,12 @@ function save(){var b=$("pub");if(b)b.disabled=false;var p=$("pst");if(p)p.textC
 function $(i){return document.getElementById(i)}
 function render(){
   $("t").textContent=S.title; $("s").textContent=S.slogan;
-  $("bg").style.setProperty("--photo",S.bg?"url("+S.bg+")":"none");
+  $("bg").style.setProperty("--photo",S.bg?"url("+I(S.bg)+")":"none");
   var m=(S.title+" · "+S.slogan+" · ").toUpperCase(); $("mq").textContent=m+m+m;
   var g=$("g"); g.textContent="";
   S.posts.forEach(function(p){
     var a=document.createElement("article"); a.className="post";
-    var im=document.createElement("div"); im.className="im"; if(p.img)im.style.backgroundImage="url("+p.img+")"; a.appendChild(im);
+    var im=document.createElement("div"); im.className="im"; if(p.img)im.style.backgroundImage="url("+I(p.img)+")"; a.appendChild(im);
     var c=document.createElement("p"); c.textContent=p.cap; a.appendChild(c);
     if(/^https:\/\//.test(p.url||"")){var l=document.createElement("a");l.href=p.url;l.target="_blank";l.rel="noopener";l.className="mono";l.textContent="Voir sur Instagram →";a.appendChild(l)}
     g.appendChild(a);
@@ -117,27 +121,39 @@ $("pa").onclick=function(){
   var f=$("pf").files[0],add=function(u){S.posts.unshift({img:u,cap:$("pc").value,url:$("pu").value.trim()});$("pc").value="";$("pu").value="";$("pf").value="";save();render()};
   if(f)shrink(f,1000,add);else add("");
 };
-function build(){
-  var c=document.cloneNode(true),q=function(i){return c.getElementById(i)};
-  q("data").textContent=JSON.stringify(S).replace(/</g,"\\u003c");
-  ["g","pl","mq","t","s","timer"].forEach(function(i){q(i).textContent=""});
-  q("bg").removeAttribute("style");
-  q("ed").className="";q("ed").setAttribute("hidden","");q("eb").setAttribute("hidden","");
-  q("page").removeAttribute("style");q("gone").removeAttribute("style");
-  return "<!DOCTYPE html>\n"+c.documentElement.outerHTML;
+var PREV={},G={};
+function I(u){return PREV[u]||u}
+try{G=JSON.parse(localStorage.getItem("gh")||"{}")}catch(e){}
+$("go").value=G.owner||"";$("gr").value=G.repo||"";$("gb").value=G.branch||"";$("gt").value=G.token||"";
+function api(p,o){o=o||{};o.headers={"Accept":"application/vnd.github+json","Authorization":"Bearer "+G.token,"Content-Type":"application/json"};
+  return fetch("https://api.github.com/repos/"+G.owner+"/"+G.repo+"/contents/"+p,o).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.message||r.status);return j})})}
+function put(p,b64,msg){return api(p+"?ref="+encodeURIComponent(G.branch)).catch(function(){return {}}).then(function(cur){
+  return api(p,{method:"PUT",body:JSON.stringify({message:msg,content:b64,branch:G.branch,sha:cur.sha})})})}
+async function pubGH(){
+  var st=$("pst"),b=$("pub");
+  G={owner:$("go").value.trim(),repo:$("gr").value.trim(),branch:$("gb").value.trim()||"main",token:$("gt").value.trim()};
+  try{localStorage.setItem("gh",JSON.stringify(G))}catch(e){}
+  if(!G.owner||!G.repo||!G.token){st.textContent="Renseigne le compte, le dépôt et le jeton.";return}
+  b.disabled=true;
+  try{
+    st.textContent="Envoi des images…";
+    var C=JSON.parse(JSON.stringify(S)),k=0,t=Date.now();
+    var up=async function(u){if(u&&u.indexOf("data:")===0){var p="img/"+t+"-"+(k++)+".jpg";await put(p,u.split(",")[1],"Image");PREV[p]=u;return p}return u};
+    C.bg=await up(C.bg);
+    for(var i=0;i<C.posts.length;i++)C.posts[i].img=await up(C.posts[i].img);
+    st.textContent="Publication…";
+    await put("content.json",btoa(unescape(encodeURIComponent(JSON.stringify(C,null,1)))),"Mise à jour du contenu");
+    S=C;render();
+    st.textContent="Envoyé. Visible pour tout le monde dans 1 à 10 minutes.";
+  }catch(e){st.textContent="Échec : "+e.message}
+  b.disabled=false;
 }
-$("pub").onclick=async function(){
-  var b=this,A=window.claude&&await claude.use("artifact");
-  if(!A){$("pst").textContent="Publication indisponible ici.";return}
-  b.disabled=true;$("pst").textContent="Publication en cours…";
-  try{await A.publish(build())}catch(e){$("pst").textContent="Échec : "+((e&&e.code)||"erreur");b.disabled=false}
-};
-$("rs").onclick=function(){if(confirm("Tout remettre à zéro ?")){S=JSON.parse(JSON.stringify(DEF));save();render();tick()}};
+$("pub").onclick=pubGH;
 function openEd(){$("eb").hidden=false;$("ed").hidden=false;$("ed").classList.add("open")}
 var n=0,tm;
 $("sec").onclick=function(){n++;clearTimeout(tm);tm=setTimeout(function(){n=0},2500);if(n>=5){n=0;openEd()}};
 addEventListener("keydown",function(e){if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==="e")openEd()});
-if(window.claude){claude.use("user").then(async function(u){if(u&&((await u.isOwner())||(await u.canEdit()))){$("eb").hidden=false;$("ed").hidden=false}}).catch(function(){})}
+fetch("content.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.posts){S=j;render();tick()}}).catch(function(){});
 $("logo").src=document.querySelector("link[rel=icon]").href;
 render();tick();setInterval(tick,60000);
 </script>
