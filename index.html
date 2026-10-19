@@ -133,7 +133,11 @@ $("pub").onclick=async function(){
   try{await A.publish(build())}catch(e){$("pst").textContent="Échec : "+((e&&e.code)||"erreur");b.disabled=false}
 };
 $("rs").onclick=function(){if(confirm("Tout remettre à zéro ?")){S=JSON.parse(JSON.stringify(DEF));save();render();tick()}};
-if(window.claude){claude.use("user").then(function(u){if(u&&(u.isOwner()||u.canEdit())){$("eb").hidden=false;$("ed").hidden=false}}).catch(function(){})}
+function openEd(){$("eb").hidden=false;$("ed").hidden=false;$("ed").classList.add("open")}
+var n=0,tm;
+$("sec").onclick=function(){n++;clearTimeout(tm);tm=setTimeout(function(){n=0},2500);if(n>=5){n=0;openEd()}};
+addEventListener("keydown",function(e){if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==="e")openEd()});
+if(window.claude){claude.use("user").then(async function(u){if(u&&((await u.isOwner())||(await u.canEdit()))){$("eb").hidden=false;$("ed").hidden=false}}).catch(function(){})}
 $("logo").src=document.querySelector("link[rel=icon]").href;
 render();tick();setInterval(tick,60000);
 </script>
